@@ -3,8 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
+interface User {
+  full_name?: string
+  username: string
+  email: string
+}
+
 export default function Home() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
   const router = useRouter()
 
   useEffect(() => {
