@@ -81,7 +81,7 @@ export default function ProfilePage() {
           full_name: fullName,
           bio: bio,
         }),
-      });
+      }); 
 
       const data = await response.json();
 
