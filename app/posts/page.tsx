@@ -6,8 +6,8 @@ import { supabase } from '@/lib/supabase'
 
 export default function PostsPage() {
   const [content, setContent] = useState('')
-  const [image, setImage] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
+  const [image, setImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -150,7 +150,7 @@ export default function PostsPage() {
               if (file) {
                 const reader = new FileReader()
                 reader.onloadend = () => {
-                  setImagePreview(reader.result)
+                  setImagePreview(reader.result as string)
                 }
                 reader.readAsDataURL(file)
               } else {

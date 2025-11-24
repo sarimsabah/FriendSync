@@ -2,10 +2,32 @@
 
 import { useState, useEffect } from 'react'
 
+interface User {
+  id: string
+  username: string
+  full_name?: string
+}
+
+interface Like {
+  id: string
+  user_id: string
+  post_id: string
+}
+
+interface Post {
+  id: string
+  content: string
+  user_id: string
+  created_at: string
+  image_url?: string
+  users?: User
+  likes?: Like[]
+}
+
 export default function FeedPage() {
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useState(null)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
 
   useEffect(() => {
     const userString = localStorage.getItem('user')
@@ -86,9 +108,9 @@ export default function FeedPage() {
     }
   }
 
-  const isPostLikedByUser = (post: any) => {
+  const isPostLikedByUser = (post: Post): boolean => {
     if (!currentUser) return false
-    return post.likes?.some((like: any) => like.user_id === currentUser.id)
+    return post.likes?.some((like: Like) => like.user_id === currentUser.id) || false
   }
 
   return (
