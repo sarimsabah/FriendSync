@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 
 export default function PostsPage() {
   const [content, setContent] = useState('')
-  const [image, setImage] = useState(null)
+  const [image, setImage] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
