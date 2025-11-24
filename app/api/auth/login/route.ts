@@ -23,8 +23,9 @@ export async function POST(request: NextRequest) {
 
     //checking if user exists
     if (!user || dbError) {
+      console.error('Login error - user not found:', dbError);
       return NextResponse.json(
-        { error: "Email or password dosen't exist" },
+        { error: "Email or password doesn't exist" },
         { status: 401 }
       );
     }
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     //checking if password is valid
     if (!isValidPassword) {
       return NextResponse.json(
-        { error: "Email or password dosen't exist" },
+        { error: "Email or password doesn't exist" },
         { status: 401 }
       );
     }
@@ -61,8 +62,9 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
+    console.error('Login error:', error);
     return NextResponse.json(
-      { message: "Internal Server error" },
+      { error: "Internal Server error" },
       { status: 500 }
     );
   }
