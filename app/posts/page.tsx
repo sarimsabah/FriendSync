@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 
 export default function PostsPage() {
   const [content, setContent] = useState('')
-  const [image, setImage] = useState<File | null>(null)
+  const [image, setImage] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -22,6 +24,35 @@ export default function PostsPage() {
     }
 
     try {
+      let imageUrl = null
+
+      // Step 1: Upload image if selected
+      if (image) {
+        const fileExt = image.name.split('.').pop()
+        const fileName = `${Math.random()}.${fileExt}`
+        const filePath = `${fileName}`
+
+        const { data: uploadData, error: uploadError } = await supabase
+          .storage
+          .from('posts')
+          .upload(filePath, image)
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError)
+          setError(`Failed to upload image: ${uploadError.message}`)
+          setLoading(false)
+          return
+        }
+
+        const { data: urlData } = supabase
+          .storage
+          .from('posts')
+          .getPublicUrl(filePath)
+
+        imageUrl = urlData.publicUrl
+      }
+
+      // Step 2: Create post with image URL
       const response = await fetch('/api/posts', {
         method: 'POST',
         headers: {
@@ -29,7 +60,8 @@ export default function PostsPage() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          content: content.trim()
+          content: content.trim(),
+          image_url: imageUrl
         })
       })
 
@@ -39,6 +71,8 @@ export default function PostsPage() {
         alert('Post created successfully!')
         setContent('')
         setImage(null)
+        setImagePreview(null)
+        router.push('/feed')
       } else {
         setError(data.error || 'Failed to create post')
       }
@@ -58,7 +92,7 @@ export default function PostsPage() {
         color: '#1F2937',
         marginBottom: '30px'
       }}>
-        Create New Post 
+        Create New Post 📝
       </h1>
 
       {error && (
@@ -109,7 +143,20 @@ export default function PostsPage() {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => setImage(e.target.files?.[0] || null)}
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null
+              setImage(file)
+              
+              if (file) {
+                const reader = new FileReader()
+                reader.onloadend = () => {
+                  setImagePreview(reader.result)
+                }
+                reader.readAsDataURL(file)
+              } else {
+                setImagePreview(null)
+              }
+            }}
             style={{
               width: '100%',
               padding: '10px',
@@ -117,6 +164,39 @@ export default function PostsPage() {
               borderRadius: '8px'
             }}
           />
+
+          {imagePreview && (
+            <div style={{ marginTop: '10px' }}>
+              <img
+                src={imagePreview}
+                alt="Preview"
+                style={{
+                  width: '100%',
+                  maxHeight: '300px',
+                  objectFit: 'cover',
+                  borderRadius: '8px'
+                }}
+              />
+              <button
+                onClick={() => {
+                  setImage(null)
+                  setImagePreview(null)
+                }}
+                style={{
+                  marginTop: '10px',
+                  padding: '8px 16px',
+                  backgroundColor: '#EF4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Remove Image
+              </button>
+            </div>
+          )}
         </div>
 
         <button

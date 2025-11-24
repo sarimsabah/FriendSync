@@ -2,31 +2,10 @@
 
 import { useState, useEffect } from 'react'
 
-interface User {
-  id: string
-  username: string
-  full_name?: string
-}
-
-interface Like {
-  id: string
-  user_id: string
-  post_id: string
-}
-
-interface Post {
-  id: string
-  content: string
-  user_id: string
-  created_at: string
-  users?: User
-  likes?: Like[]
-}
-
 export default function FeedPage() {
-  const [posts, setPosts] = useState<Post[]>([])
+  const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [currentUser, setCurrentUser] = useState(null)
 
   useEffect(() => {
     const userString = localStorage.getItem('user')
@@ -107,9 +86,9 @@ export default function FeedPage() {
     }
   }
 
-  const isPostLikedByUser = (post: Post): boolean => {
+  const isPostLikedByUser = (post: any) => {
     if (!currentUser) return false
-    return post.likes?.some((like: Like) => like.user_id === currentUser.id) || false
+    return post.likes?.some((like: any) => like.user_id === currentUser.id)
   }
 
   return (
@@ -183,6 +162,20 @@ export default function FeedPage() {
                 }}>
                   {post.content}
                 </p>
+
+                {post.image_url && (
+                  <img
+                    src={post.image_url}
+                    alt="Post image"
+                    style={{
+                      width: '100%',
+                      maxHeight: '500px',
+                      objectFit: 'cover',
+                      borderRadius: '12px',
+                      marginBottom: '10px'
+                    }}
+                  />
+                )}
 
                 <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '15px' }}>
                   {new Date(post.created_at).toLocaleString()}
