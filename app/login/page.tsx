@@ -27,6 +27,7 @@ export default function LoginPage() {
       if (response.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        window.dispatchEvent(new Event("authChange"));
         router.push("/");
       } else {
         setError(data.error || "Login failed");

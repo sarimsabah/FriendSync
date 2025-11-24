@@ -11,17 +11,36 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
+  const checkAuthState = () => {
     const userString = localStorage.getItem("user");
     if (userString) {
       setUser(JSON.parse(userString));
+    } else {
+      setUser(null);
     }
+  };
+
+  useEffect(() => {
+    // Check auth state on mount
+    checkAuthState();
+
+    // Listen for custom auth change events
+    const handleAuthChange = () => {
+      checkAuthState();
+    };
+
+    window.addEventListener("authChange", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("authChange", handleAuthChange);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    window.dispatchEvent(new Event("authChange"));
     router.push("/login");
   };
 
